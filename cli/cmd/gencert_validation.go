@@ -146,6 +146,10 @@ func genValidateOptions() {
 		}
 	}
 
+	if len(genMFASerial) == 0 && hasConfigKey {
+		genMFASerial = viper.GetString(fmt.Sprintf("%s.aws.kmsauth.mfa_serial", keyPrefix))
+	}
+
 	if hasConfigKey {
 		failoverKey := fmt.Sprintf("%s.failover", keyPrefix)
 		if viper.IsSet(failoverKey) {

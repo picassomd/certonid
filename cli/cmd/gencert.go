@@ -32,13 +32,15 @@ var (
 	genKMSAuthKeyID           string
 	genKMSAuthServiceID       string
 	genKMSAuthTokenValidUntil string
+	genMFASerial              string
+	genMFAToken               string
 
 	genFailoverVariants []FailoverSchema
 
 	gencertCmd = &cobra.Command{
 		Use:   "gencert [OPTIONS] [KEY NAME]",
 		Short: "Generate user or host certificate",
-		Long:  `Generate user or host sertificate by involke serverless function`,
+		Long:  `Generate user or host certificate by invoking serverless function`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
 				kmsauthToken  string
@@ -182,4 +184,7 @@ func init() {
 	gencertCmd.Flags().StringVar(&genKMSAuthKeyID, "kmsauth-key-id", "", "KMSAuth key ID")
 	gencertCmd.Flags().StringVar(&genKMSAuthServiceID, "kmsauth-service-id", "", "KMSAuth service ID")
 	gencertCmd.Flags().StringVar(&genKMSAuthTokenValidUntil, "kmsauth-token-ttl", "", "KMSAuth token TTL")
+	gencertCmd.Flags().StringVar(&genMFASerial, "kmsauth-mfa-serial", "", "KMSAuth MFA serial number")
+	gencertCmd.Flags().StringVar(&genMFAToken, "kmsauth-code", "", "KMSAuth MFA token")
+	gencertCmd.MarkFlagRequired("kmsauth-code")
 }
