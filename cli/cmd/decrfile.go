@@ -16,6 +16,8 @@ var (
 	decrfileType          string
 	decrfileAwsKmsRegion  string
 	decrfileAwsKmsProfile string
+	decrfileMFASerial     string
+	decrfileMFAToken      string
 
 	decrfileCmd = &cobra.Command{
 		Use:   "decrfile [OPTIONS] FILEPATH",
@@ -44,7 +46,7 @@ var (
 
 			switch strings.ToLower(decrfileType) {
 			case "aws_kms":
-				kmsClient := awscloud.New(decrfileAwsKmsProfile).KmsClient(decrfileAwsKmsRegion)
+				kmsClient := awscloud.NewAssumed(decrfileAwsKmsProfile, decrfileMFASerial, decrfileMFAToken).KmsClient(decrfileAwsKmsRegion)
 				results, err = kmsClient.KmsDecryptText(fileContent)
 			default: // symmetric
 				results, err = utils.SymmetricDecrypt(fileContent)
@@ -71,5 +73,6 @@ func init() {
 	rootCmd.AddCommand(decrfileCmd)
 	decrfileCmd.Flags().StringVarP(&decrfileType, "type", "t", "symmetric", "Decryption type (symmetric, aws_kms, gcloud_kms)")
 	decrfileCmd.Flags().StringVar(&decrfileAwsKmsProfile, "aws-kms-profile", "", "AWS KMS Profile")
-	decrfileCmd.Flags().StringVar(&decrfileAwsKmsRegion, "aws-kms-region", "", "AWS KMS Region")
+	decrfileCmd.Flags().StringVar(&decrfileMFASerial, "aws-mfa-serial", "", "AWS MFA serial number")
+	decrfileCmd.Flags().StringVar(&decrfileMFAToken, "aws-mfa-token", "", "AWS MFA token")
 }

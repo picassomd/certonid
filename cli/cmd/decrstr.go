@@ -13,6 +13,8 @@ var (
 	decrstrType          string
 	decrstrAwsKmsRegion  string
 	decrstrAwsKmsProfile string
+	decrstrMFASerial     string
+	decrstrMFAToken      string
 
 	decrstrCmd = &cobra.Command{
 		Use:   "decrstr [OPTIONS] TEXT",
@@ -27,7 +29,7 @@ var (
 
 			switch strings.ToLower(decrstrType) {
 			case "aws_kms":
-				kmsClient := awscloud.New(decrstrAwsKmsProfile).KmsClient(decrstrAwsKmsRegion)
+				kmsClient := awscloud.NewAssumed(decrstrAwsKmsProfile, decrstrMFASerial, decrstrMFAToken).KmsClient(decrstrAwsKmsRegion)
 				text, err = kmsClient.KmsDecryptText(args[0])
 			default: // symmetric
 				text, err = utils.SymmetricDecrypt(args[0])
@@ -49,4 +51,6 @@ func init() {
 	decrstrCmd.Flags().StringVarP(&decrstrType, "type", "t", "symmetric", "Decryption type (symmetric, aws_kms, gcloud_kms)")
 	decrstrCmd.Flags().StringVar(&decrstrAwsKmsProfile, "aws-kms-profile", "", "AWS KMS Profile")
 	decrstrCmd.Flags().StringVar(&decrstrAwsKmsRegion, "aws-kms-region", "", "AWS KMS Region")
+	decrstrCmd.Flags().StringVar(&decrstrMFASerial, "aws-mfa-serial", "", "AWS MFA serial number")
+	decrstrCmd.Flags().StringVar(&decrstrMFAToken, "aws-mfa-token", "", "AWS MFA token")
 }

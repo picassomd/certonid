@@ -17,6 +17,8 @@ var (
 	encrfileAwsKmsKeyID   string
 	encrfileAwsKmsProfile string
 	encrfileAwsKmsRegion  string
+	encrfileMFASerial     string
+	encrfileMFAToken      string
 
 	encrfileCmd = &cobra.Command{
 		Use:   "encrfile [OPTIONS] FILEPATH",
@@ -43,7 +45,7 @@ var (
 
 			switch strings.ToLower(encrfileType) {
 			case "aws_kms":
-				kmsClient := awscloud.New(encrfileAwsKmsProfile).KmsClient(encrfileAwsKmsRegion)
+				kmsClient := awscloud.NewAssumed(encrfileAwsKmsProfile, encrfileMFASerial, encrfileMFAToken).KmsClient(encrfileAwsKmsRegion)
 				encText, err = kmsClient.KmsEncryptText(encrfileAwsKmsKeyID, fileBytes)
 			default: // symmetric
 				encText, err = utils.SymmetricEncrypt(fileBytes)
@@ -72,4 +74,6 @@ func init() {
 	encrfileCmd.Flags().StringVar(&encrfileAwsKmsKeyID, "aws-kms-key-id", "", "AWS KMS Key ID")
 	encrfileCmd.Flags().StringVar(&encrfileAwsKmsProfile, "aws-kms-profile", "", "AWS KMS Profile")
 	encrfileCmd.Flags().StringVar(&encrfileAwsKmsRegion, "aws-kms-region", "", "AWS KMS Region")
+	encrfileCmd.Flags().StringVar(&encrfileMFASerial, "aws-mfa-serial", "", "AWS MFA serial number")
+	encrfileCmd.Flags().StringVar(&encrfileMFAToken, "aws-mfa-token", "", "AWS MFA token")
 }

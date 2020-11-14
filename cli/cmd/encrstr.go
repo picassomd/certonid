@@ -14,6 +14,8 @@ var (
 	encrstrAwsKmsKeyID   string
 	encrstrAwsKmsProfile string
 	encrstrAwsKmsRegion  string
+	encrstrMFASerial     string
+	encrstrMFAToken      string
 
 	encrstrCmd = &cobra.Command{
 		Use:   "encrstr [OPTIONS] TEXT",
@@ -28,7 +30,7 @@ var (
 
 			switch strings.ToLower(encrstrType) {
 			case "aws_kms":
-				kmsClient := awscloud.New(encrstrAwsKmsProfile).KmsClient(encrstrAwsKmsRegion)
+				kmsClient := awscloud.NewAssumed(encrstrAwsKmsProfile, encrstrMFASerial, encrstrMFAToken).KmsClient(encrstrAwsKmsRegion)
 				encText, err = kmsClient.KmsEncryptText(encrstrAwsKmsKeyID, []byte(args[0]))
 			default: // symmetric
 				encText, err = utils.SymmetricEncrypt([]byte(args[0]))
@@ -51,4 +53,6 @@ func init() {
 	encrstrCmd.Flags().StringVar(&encrstrAwsKmsKeyID, "aws-kms-key-id", "", "AWS KMS Key ID")
 	encrstrCmd.Flags().StringVar(&encrstrAwsKmsProfile, "aws-kms-profile", "", "AWS KMS Profile")
 	encrstrCmd.Flags().StringVar(&encrstrAwsKmsRegion, "aws-kms-region", "", "AWS KMS Region")
+	encrstrCmd.Flags().StringVar(&encrstrMFASerial, "aws-mfa-serial", "", "AWS MFA serial number")
+	encrstrCmd.Flags().StringVar(&encrstrMFAToken, "aws-mfa-token", "", "AWS MFA token")
 }
