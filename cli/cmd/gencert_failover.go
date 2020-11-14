@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/certonid/certonid/adapters/awscloud"
 	"github.com/certonid/certonid/utils"
 
 	log "github.com/sirupsen/logrus"
@@ -26,6 +27,7 @@ type FailoverSchema struct {
 func genCertAWSFailover(keyData []byte) ([]byte, error) {
 	var (
 		certBytes        []byte
+		client           *awscloud.Client
 		kmsauthToken     string
 		err              error
 		kmsAuthKeyID     string
@@ -63,7 +65,7 @@ func genCertAWSFailover(keyData []byte) ([]byte, error) {
 		}
 
 		if genCertType != utils.HostCertType && len(kmsAuthKeyID) != 0 && len(kmsAuthServiceID) != 0 {
-			kmsauthToken, err = GenerateAwsKMSAuthToken(
+			client, kmsauthToken, err = GenerateAwsKMSAuthToken(
 				kmsAuthKeyID,
 				kmsAuthServiceID,
 				kmsValidUntil,
@@ -83,7 +85,7 @@ func genCertAWSFailover(keyData []byte) ([]byte, error) {
 		}
 
 		certBytes, err = genCertFromAws(
-			awsProfile,
+			client,
 			awsRegion,
 			awsFuncName,
 			keyData,

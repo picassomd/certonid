@@ -10,17 +10,18 @@ import (
 )
 
 // GenerateAwsKMSAuthToken return kmsauth token
-func GenerateAwsKMSAuthToken(kmsAuthKeyID, kmsAuthServiceID, kmsAuthTokenValidUntil, awsProfile, awsRegion string) (string, error) {
+func GenerateAwsKMSAuthToken(kmsAuthKeyID, kmsAuthServiceID, kmsAuthTokenValidUntil, awsProfile, awsRegion string) (*awscloud.Client, string, error) {
 	validUntil, err := time.ParseDuration(kmsAuthTokenValidUntil)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
 			"value": kmsAuthTokenValidUntil,
 		}).Error("Invalid KMSAuth ValidUntil value")
-		return "", fmt.Errorf("Invalid KMSAuth ValidUntil value: %w", err)
+		return nil, "", fmt.Errorf("Invalid KMSAuth ValidUntil value: %w", err)
 	}
 
-	kmsClient := awscloud.NewAssumed(awsProfile, genMFASerial, genMFAToken).KmsClient(awsRegion)
+	awsClient := awscloud.NewAssumed(awsProfile, genMFASerial, genMFAToken)
+	kmsClient := awsClient.KmsClient(awsRegion)
 
 	kmsauthContext := &kmsauth.AuthContextV2{
 		From:     genUsername,
@@ -40,8 +41,8 @@ func GenerateAwsKMSAuthToken(kmsAuthKeyID, kmsAuthServiceID, kmsAuthTokenValidUn
 	encryptedToken, err := tg.GetEncryptedToken()
 
 	if err != nil {
-		return "", fmt.Errorf("Error to generate kmsauth token: %w", err)
+		return nil, "", fmt.Errorf("Error to generate kmsauth token: %w", err)
 	}
 
-	return encryptedToken.String(), nil
+	return awsClient, encryptedToken.String(), nil
 }

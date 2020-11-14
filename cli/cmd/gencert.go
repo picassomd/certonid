@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/certonid/certonid/adapters/awscloud"
 	"github.com/certonid/certonid/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -43,6 +44,7 @@ var (
 		Long:  `Generate user or host certificate by invoking serverless function`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
+				client        *awscloud.Client
 				kmsauthToken  string
 				certBytes     []byte
 				serverlessErr error
@@ -94,7 +96,7 @@ var (
 			default: // aws
 				// kmsauth for aws
 				if genCertType != utils.HostCertType && len(genKMSAuthKeyID) != 0 && len(genKMSAuthServiceID) != 0 {
-					kmsauthToken, err = GenerateAwsKMSAuthToken(
+					client, kmsauthToken, err = GenerateAwsKMSAuthToken(
 						genKMSAuthKeyID,
 						genKMSAuthServiceID,
 						genKMSAuthTokenValidUntil,
@@ -107,7 +109,7 @@ var (
 				}
 
 				certBytes, serverlessErr = genCertFromAws(
-					genAwsProfile,
+					client,
 					genAwsRegion,
 					genAwsFuncName,
 					publicKeyData,
