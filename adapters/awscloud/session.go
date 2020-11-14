@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	log "github.com/sirupsen/logrus"
 )
 
 // Client store aws info
@@ -22,6 +23,10 @@ func NewAssumed(profile string, mfaSerial string, mfaCode string) *Client {
 	sts := baseClient.StsClient()
 	tokenOutput, err := sts.GetSessionToken(mfaSerial, mfaCode)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"tokenCode": mfaCode,
+			"error":     err,
+		}).Error("Error getting session token")
 		os.Exit(1)
 	}
 
