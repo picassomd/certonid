@@ -9,6 +9,7 @@ import (
 
 	"github.com/certonid/certonid/adapters/awscloud"
 	"github.com/certonid/certonid/utils"
+	"github.com/martinlindhe/inputbox"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
@@ -95,6 +96,14 @@ var (
 				// TODO
 			default: // aws
 				// kmsauth for aws
+				if len(genMFAToken) == 0 {
+					var ok bool
+					genMFAToken, ok = inputbox.InputBox("AWS MFA Required", "Enter your MFA code", "")
+					if !ok {
+						er("Couldn't get MFA token")
+					}
+				}
+
 				if genCertType != utils.HostCertType && len(genKMSAuthKeyID) != 0 && len(genKMSAuthServiceID) != 0 {
 					client, kmsauthToken, err = GenerateAwsKMSAuthToken(
 						genKMSAuthKeyID,
@@ -188,5 +197,4 @@ func init() {
 	gencertCmd.Flags().StringVar(&genKMSAuthTokenValidUntil, "kmsauth-token-ttl", "", "KMSAuth token TTL")
 	gencertCmd.Flags().StringVar(&genMFASerial, "kmsauth-mfa-serial", "", "KMSAuth MFA serial number")
 	gencertCmd.Flags().StringVar(&genMFAToken, "kmsauth-code", "", "KMSAuth MFA token")
-	gencertCmd.MarkFlagRequired("kmsauth-code")
 }
